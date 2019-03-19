@@ -1,0 +1,12 @@
+{
+    "name": "c3po",
+    "version": "1.0.0",
+    "description": "Human-cyborg relations",
+    "main": "bot.js",
+    "author": "sigmarite",
+    "dependencies": {
+        "cheerio": "^1.0.0-rc.2",
+        "discord.io": "github:woor/discord.io#gateway_v6",
+        "request": "^2.88.0"
+    }
+}
