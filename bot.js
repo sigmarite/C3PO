@@ -102,6 +102,7 @@ function loadPilots(shipFileList) {
             const ship = JSON.parse($.text());
             const shipPilots = ship.pilots;
             for (pilot of shipPilots) {
+                pilot.ship = ship;
                 data.pilots[pilot.xws] = pilot;
             }
         });
@@ -130,33 +131,72 @@ class ListPrinter {
 
     getEmbed(url) {
         const fields = [];
+        var totalCost = 0;
         for (let pilot of this.listXWS.pilots) {
-            const name = "__" + data.pilots[pilot.id].name + "__ (" + pilot.points + ")";
-            var value = "";
-            const upgrades = Object.values(pilot.upgrades).reduce((acc, val) => acc.concat(val), []);
+            var pilotCost = 0;
+            const pilotData = data.pilots[pilot.id] ? data.pilots[pilot.id] : {name: pilot.id, cost: NaN, ship: {name: 'undefined'}};
+            pilotCost += pilotData.cost;
+            const name1 = "__" + pilotData.name + "__";
+            totalCost += pilotData.cost;
+            var value1 = "\t*" + pilotData.ship.name + "*\n";
+            var value2 = "(" + (pilotData.cost ? pilotData.cost : NaN) + ")\n";
+            const upgrades = Object.values(pilot.upgrades ? pilot.upgrades : []).reduce((acc, val) => acc.concat(val), []);
             for (let upgrade of upgrades) {
-                const upgradeData = data.upgrades[upgrade]; 
-                value += "\t" + upgradeData.name + " (" + getCost(upgradeData.cost) + ")\n";
+                const upgradeData = data.upgrades[upgrade] ? data.upgrades[upgrade] : {cost: {value: NaN, name: upgrade}}; 
+                const upgradeCost = getCost(upgradeData.cost, pilotData);
+                value1 += upgradeData.name + "\n";
+                value2 +=  "(" + upgradeCost + ")\n";
+                totalCost += upgradeCost;
+                pilotCost += upgradeCost
             }
+            const name2 =  "(" + pilotCost + ")";
             fields.push(
                 {
-                    "name": name,
-                    "value": value
+                    "name": name1,
+                    "value": value1,
+                    "inline": true
+                }
+            );
+            fields.push(
+                {
+                    "name": name2,
+                    "value": value2,
+                    "inline": true
                 }
             )
         }
 
         return {
-            "title": "**" + this.listXWS.name ? this.listXWS.name : 'Unnamed Squadron' + "** (" + this.listXWS.points + ")",
+            "title": "**" + (this.listXWS.name ? this.listXWS.name : 'Unnamed Squadron') + "** (" + totalCost + ")",
             "color": 16309276,
+            "url": url,
             "thumbnail": {
-            "url": data.factions[this.listXWS.faction].icon
+            "url": data.factions[this.listXWS.faction] ? data.factions[this.listXWS.faction].icon : 'https://i.kym-cdn.com/photos/images/newsfeed/001/005/938/600.jpg'
             },
             "fields": fields
         }
     }
 }
 
-function getCost(upgradeCost) {
-    return upgradeCost.value ? upgradeCost.value : Object.values(upgradeCost.values)[0];
+function getCost(upgradeCost, dataPilot) {
+    if (upgradeCost == undefined) {
+        return 0;
+    }
+    if (upgradeCost.value != undefined) {
+        return upgradeCost.value ;
+    } else if (upgradeCost.values != undefined) {
+        switch (upgradeCost.variable) {
+            case "size":
+            const size = dataPilot.ship.size;
+                return upgradeCost.values[size];
+            case "agility":
+                const agility = dataPilot.ship.stats.filter((stat) => stat.type == "agility")[0].value;
+                return upgradeCost.values[agility];
+            case "initiative":
+                const init = dataPilot.initiative
+                return upgradeCost.values[init];
+            default:
+                return Object.values(upgradeCost.values)[0];
+        }
+    }
 }
