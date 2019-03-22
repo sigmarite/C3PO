@@ -166,12 +166,39 @@ class ListPrinter {
             )
         }
 
+        let iconURL;
+        switch (this.listXWS.faction) {
+            case 'rebelalliance':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/Rebel.png';
+                break;
+            case 'galacticempire':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/Imperial.png';
+                break;
+            case 'scumandvillainy':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/Scum.png';
+                break;
+            case 'resistance':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/ResistanceBannerWeb.png';
+                break;
+            case 'firstorder':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/FirstOrderBannerWeb.png';
+                break;
+            case 'galacticrepublic':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/FirstOrderBannerWeb.png';
+                break;
+            case 'separatistalliance':
+                iconURL = 'https://sb-cdn.fantasyflightgames.com/factions/banners/web/SeparatistBannerWeb.png';
+                break;
+            default:
+                iconURL = '';
+        }
+
         return {
             "title": "**" + (this.listXWS.name ? this.listXWS.name : 'Unnamed Squadron') + "** (" + totalCost + ")",
             "color": 16309276,
             "url": url,
             "thumbnail": {
-            "url": data.factions[this.listXWS.faction] ? data.factions[this.listXWS.faction].icon : 'https://i.kym-cdn.com/photos/images/newsfeed/001/005/938/600.jpg'
+            "url": iconURL
             },
             "fields": fields
         }
